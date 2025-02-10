@@ -1,5 +1,5 @@
 from ApiBase.ApiBase import ApiBase
-from commond.commond import Auth
+# from commond.commond import Auth
 
 class Service:
      @classmethod
@@ -7,7 +7,7 @@ class Service:
           self.host = host
           self.port = port
           ApiBase()
-          self.adminEndpoint()
+          self.load_endpoints()
           self.ServiceStart()
 
      @classmethod
@@ -15,9 +15,8 @@ class Service:
           ApiBase.start(cls.host, cls.port)
 
      @classmethod
-     def adminEndpoint(cls):
-          ApiBase.get('/test', cls.test, ['admin'], Auth.Bearer)
-
-     @staticmethod
-     def test(request):
-          return 'test test'
+     def load_endpoints(cls):
+          try:
+               import AdminEndpoint.v1.endpoint
+          except Exception as err:
+               print(f"Failed to load endpoints: {err}")
