@@ -1,11 +1,12 @@
 from ApiBase.ApiBase import ApiBase
-# from commond.commond import Auth
+from MysqlBase.MysqlBase import MysqlService
 
 class Service:
      @classmethod
      def __init__(self, host: str = None, port: int = None):
           self.host = host
           self.port = port
+          MysqlService()
           ApiBase()
           self.load_endpoints()
           self.ServiceStart()
