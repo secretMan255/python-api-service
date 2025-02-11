@@ -1,12 +1,12 @@
 from service import Service
-
-def main():
+import asyncio
+async def main():
      try:
           print('Service initialize...')
-          Service()
+          await Service.async_init()
      except Exception as err:
           print(f'Init service failed: {err}')
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

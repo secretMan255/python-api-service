@@ -2,18 +2,21 @@ from ApiBase.ApiBase import ApiBase
 from MysqlBase.MysqlBase import MysqlService
 
 class Service:
-     @classmethod
      def __init__(self, host: str = None, port: int = None):
           self.host = host
           self.port = port
-          MysqlService()
           ApiBase()
-          self.load_endpoints()
-          self.ServiceStart()
 
      @classmethod
-     def ServiceStart(cls):
-          ApiBase.start(cls.host, cls.port)
+     async def async_init(cls, host: str = None, port: int = None):
+          instance = cls(host, port)
+          instance.load_endpoints()
+          await instance.ServiceStart()
+          return instance
+
+     async def ServiceStart(self):
+          await MysqlService.init()
+          await ApiBase.start(self.host, self.port)
 
      @classmethod
      def load_endpoints(cls):
