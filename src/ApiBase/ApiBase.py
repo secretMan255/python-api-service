@@ -1,11 +1,12 @@
 import datetime
 import os
+from typing import Callable
 import jwt
 import traceback
 from functools import wraps
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, g, send_file
-from flask_cors import CORS
+from quart import Quart, request, jsonify, Response, g, send_file
+from quart_cors import cors
 from enum import Enum
 # from ..commond.commond import Auth, ResultType
 from commond.commond import Auth, ResultType
@@ -22,7 +23,7 @@ class ApiBase:
      @classmethod
      def __init__(self):
           if self.app is None: 
-               self.app = Flask(__name__ or "default_app")
+               self.app = Quart(__name__ or "default_app")
                self.app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
                self.app.url_map.strict_slashes = False
 
@@ -31,7 +32,8 @@ class ApiBase:
                load_dotenv()
 
                # cors config
-               CORS(self.app, origins=os.getenv('ALLOWED_ORIGINS', '*'))
+               self.app = cors(self.app, allow_origin=os.getenv('ALLOWED_ORIGINS', '*'), allow_credentials=True)
+
           
           # token secret
           self.secret_key = os.getenv('SECRET_KEY')
@@ -40,26 +42,24 @@ class ApiBase:
           
           print('API initialize ...')
 
-     # start api service
+     # Start API Service
      @classmethod
-     def start(cls, host: str = None, port: int = None):
+     async def start(cls, host: str = None, port: int = None):
           cls.checkInit()
 
           resolveHost = os.getenv('HOST', host or '127.0.0.1')
           resolvePort = int(os.getenv('PORT', port or 8080))
-          print('API service started ...')
-          cls.app.run(
-               host= resolveHost,
-               port= resolvePort
-          )
+          print('API service started...')
+          
+          await cls.app.run_task(host=resolveHost, port=resolvePort)
 
      # generate token
      @classmethod
-     def generate_token(cls, payload: dict, expiresIn: int = None) -> str:
+     def generateToken(cls, payload: dict, expiresIn: int = None) -> str:
           cls.checkInit()
           
           if expiresIn is None:
-               expiresIn = os.getenv('EXPIRES_IN', '3600')
+               expiresIn = int(os.getenv('EXPIRES_IN', '3600'))
 
           payloadCopy = payload.copy()
           payloadCopy['exp'] = datetime.datetime.utcnow() + datetime.timedelta(seconds=expiresIn)
@@ -68,11 +68,11 @@ class ApiBase:
 
      # get endpoint
      @classmethod
-     def get(cls, endpoint: str, handler, allowedRoles: list, authType: Auth):
+     def get(cls, endpoint: str, handler: Callable, allowedRoles: list, authType: Auth):
           cls.checkInit()
 
           @wraps(handler)
-          def wrapped(*args, **kwargs):
+          async def wrapped(*args, **kwargs):
                authResponse = cls.autheticationMiddleware(authType)
 
                if authResponse is not None:
@@ -86,11 +86,11 @@ class ApiBase:
                     print(f'Request Headers: {request.headers}')
                     print(f'Query Parameters: {request.args}')
                     print(f'Route Parameters: {kwargs  }')
-                    result = handler(request)
+                    result = await handler(request)
                     print(f'Result: {result}')
 
                     if isinstance(result, dict) and result.get('type') == ResultType.IMAGE.value:
-                         return send_file(result.get('image'), mimetype='image/jpeg')
+                         return await send_file(result.get('image'), mimetype='image/jpeg')
                     else:
                          return jsonify({'ret': Res.SUCCESS.value, 'data': result}), 200
                except Exception as err:
@@ -100,13 +100,12 @@ class ApiBase:
      
      # post endpoint
      @classmethod
-     def post(cls, endpoint: str, handler, allowedRoles: list, authType: Auth):
+     def post(cls, endpoint: str, handler: Callable, allowedRoles: list, authType: Auth):
           cls.checkInit()
           
           @wraps(handler)
-          def wrapped(*args, **kwargs):
-               authMiddleware = cls.autheticationMiddleware(authType)
-               authResponse = authMiddleware()
+          async def wrapped(*args, **kwargs):
+               authResponse = cls.autheticationMiddleware(authType)
 
                if authResponse is not None:
                     return authResponse
@@ -118,9 +117,14 @@ class ApiBase:
                try:
                     print("Request Headers:", request.headers)
                     print("Query Parameters:", request.args)
-                    print("Request JSON:", request.get_json())
-                    result = handler(request)
+                    json_data = await request.get_json()
+                    print("Request JSON:", json_data)
+
+                    result = await handler(json_data)
                     print("Result:", result)
+
+                    if isinstance(result, (Response)):
+                         return result
 
                     return jsonify({'ret': Res.SUCCESS.value, 'data': result}), 200
                except Exception as e:
@@ -168,9 +172,10 @@ class ApiBase:
           try:
                payload = jwt.decode(token, cls.secret_key, algorithms=['HS256'])
 
-               for field in ['role', 'id', 'email', 'name']:
+               for field in ['role', 'id', 'username']:
                     if field not in payload:
                          return jsonify({'ret': Res.FAIL.value, 'msg': f'{field} is required'}), 401
+                    
                g.authUser = payload
           except jwt.ExpiredSignatureError:
                return jsonify({'ret': Res.FAIL.value, 'msg': 'Token expired'}), 401
