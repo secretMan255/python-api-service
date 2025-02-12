@@ -26,7 +26,7 @@ async def onLogin(request):
 
           response = await make_response(jsonify(
                {
-                    'ret': 0, 
+                    'ret': -1, 
                     'data': {
                          'status': 0,
                          'msg': 'Login successful'
@@ -39,7 +39,8 @@ async def onLogin(request):
                httponly=True,  # Prevent JavaScript access
                secure=False,  # HTTPS only
                samesite='Strict',  # Prevent CSRF
-               max_age=3600  # 1 hour expiration
+               max_age=3600,  # 1 hour expiration
+               path='/'
           )
 
           await MysqlService.updateAdminLoginTime(data.username)
@@ -49,3 +50,24 @@ async def onLogin(request):
                'status': -1,
                'msg': 'Invalid credential'
           }
+     
+async def onLogout(request):
+     response = await make_response(jsonify(
+                    {
+                         'ret': -1, 
+                         'data': {
+                              'status': 0,
+                              'msg': 'Logout successful'
+                         }
+                    }
+               ))
+     response.set_cookie(
+          "authToken", 
+          "", 
+          httponly=True,  
+          secure=False,   
+          samesite="Strict", 
+          max_age=0, 
+          path="/"  
+     )
+     return response
