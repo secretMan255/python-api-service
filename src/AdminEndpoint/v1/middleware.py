@@ -71,3 +71,6 @@ async def onLogout(request):
           path="/"  
      )
      return response
+
+async def onGetProducts(request):
+     return await MysqlService.getProducts()

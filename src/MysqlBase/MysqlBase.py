@@ -42,6 +42,10 @@ class MysqlService:
            
 
      @classmethod
+     async def getProducts(cls):
+          return await cls.exec('sp_get_all_product', [])
+
+     @classmethod
      def checkMysqlInitial(cls):
           if cls.Instance is None:
                raise Exception(f'Mysql service is not initial')
