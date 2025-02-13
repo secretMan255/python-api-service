@@ -38,3 +38,16 @@ Main: BEGIN
     WHERE username = p_username;
 END Main $$
 DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS 'sp_get_all_product' $$
+CREATE PROCEDURE `sp_get_all_product`()
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    SELECT PDT.id, PDT.name, COALESCE(CAST(PDT.p_id AS CHAR), '0') AS parentId, PDT.icon, PDT.describe, PDT.status, PDT.createAt AS createTime
+    FROM pnk.products PDT;
+    
+END Main $$
+DELIMITER ;
