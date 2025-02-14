@@ -1,3 +1,5 @@
+import asyncio
+from typing import List
 import aiomysql
 import os
 from commond.commond import compareHash
@@ -14,7 +16,8 @@ class MysqlService:
                          user=os.getenv('DB_USER'),
                          port=int(os.getenv('DB_PORT')),
                          password=os.getenv('DB_PASS'),
-                         db=os.getenv('DB_NAME')
+                         db=os.getenv('DB_NAME'),
+                         autocommit=True,
                     )
                     # self.cursor = self.Instance.cursor(dictionary=True)
                     print('Mysql service init')
@@ -29,21 +32,59 @@ class MysqlService:
                async with conn.cursor(aiomysql.DictCursor) as cursor:
                     query = f"CALL {sp}({', '.join(['%s'] * len(data))})" if data else f"CALL {sp}()"
                     await cursor.execute(query, data or ())
+
+                    await conn.commit()
                     return await cursor.fetchall()
      
      @classmethod
      async def login(cls, data):
+          cls.checkMysqlInitial()
+
           res = await cls.exec('sp_admin_login', [data.username])
           return { 'validate': compareHash(data.password, res[0]["password"]), 'id': res[0]['id']}
 
      @classmethod
      async def updateAdminLoginTime(cls, username: str):
+          cls.checkMysqlInitial()
           return await cls.exec('sp_update_admin_last_login', [username])
            
 
      @classmethod
      async def getProducts(cls):
+          cls.checkMysqlInitial()
           return await cls.exec('sp_get_all_product', [])
+
+     @classmethod
+     async def updateProductDescribe(cls, productId: int, describe: str):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_update_product_describe', [productId, describe])
+     
+     @classmethod
+     async def updateProductDetail(cls, productId: int, productName: str, parentId: int, icon: str):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_update_product_detail', [productId, productName, parentId, icon])
+
+     @classmethod
+     async def updateProductStatus(cls, productId: List[int], status: int):
+          cls.checkMysqlInitial()
+          await asyncio.gather(*[cls.exec('sp_update_product_status', [x, status]) for x in productId])
+          return 
+     
+     @classmethod
+     async def deleteProduct(cls, productId: int):
+          cls.checkMysqlInitial()
+          await asyncio.gather(*[cls.exec('sp_delete_product', [x]) for x in productId]) 
+          return 
+     
+     @classmethod
+     async def addProduct(cls, productName: str, parentId: str, icon: str, describe: List[str]):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_add_product', [productName, parentId, icon, describe])
+
+     @classmethod
+     async def updateProductParentId(cls, originalId: int, newId: int):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_update_prodcut_parent_id', [originalId, newId])
 
      @classmethod
      def checkMysqlInitial(cls):

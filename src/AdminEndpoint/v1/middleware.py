@@ -1,6 +1,6 @@
 from quart import jsonify, make_response
 from ApiBase.ApiBase import ApiBase
-from validateParam.pydantic import LoginValidate
+from validateParam.pydantic import LoginValidate, UpdateProductDescribeValidate, UpdateProductDetailValidate, UpdateProductStatusValidate, DeleteProductValidate, AddProductValidate, UpdateProductParentIdValidate
 from MysqlBase.MysqlBase import MysqlService
 
 async def test(request):
@@ -74,3 +74,42 @@ async def onLogout(request):
 
 async def onGetProducts(request):
      return await MysqlService.getProducts()
+
+async def onUpdateProductDescribe(request):
+     isValid, data = UpdateProductDescribeValidate(request)
+     if not isValid:
+          return jsonify({"status" : -1, "msg": f'Invalid input - {data}'})
+     
+     return await MysqlService.updateProductDescribe(data.productId, data.describe)
+
+async def onUpdateProductDetail(request):
+     isValid, data = UpdateProductDetailValidate(request)
+     if not isValid:
+          return jsonify({"status" : -1, "msg" : f'Invalid input - {data}'})
+
+     return await MysqlService.updateProductDetail(data.productId, data.productName, data.parentId, data.icon)
+
+async def onUpdateProductStatus(request):
+     isValid, data = UpdateProductStatusValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+
+     return await MysqlService.updateProductStatus(data.productId, data.status)
+
+async def onDeleteProduct(request):
+     isValid, data = DeleteProductValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.deleteProduct(data.productId)
+
+async def onUpdateProductPerantId(request):
+     isValid, data = UpdateProductParentIdValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.updateProductParentId(data.originalParentId, data.newParentId)
+
+async def onAddProduct(request):
+     isValid, data = AddProductValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.addProduct(data.productName, data.parentId, data.icon, data.describe)
