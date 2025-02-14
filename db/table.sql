@@ -12,3 +12,5 @@ CREATE TABLE `admin`.`user` (
 
 ALTER TABLE `admin`.`user` 
 CHANGE COLUMN `updateAt` `lastLoginAt` DATETIME NULL DEFAULT NULL AFTER `password`;
+
+-- GRANT ALL PRIVILEGES ON `admin`.* TO `root`@`localhost`;
