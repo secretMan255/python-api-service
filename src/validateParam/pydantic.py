@@ -33,6 +33,14 @@ class UpdateProductParentId(BaseModel):
      originalParentId: int
      newParentId: int
 
+class UpdateItemDetail(BaseModel):
+     itemId: int
+     itemName: str
+     itemParentId: int
+     itemPrice: float
+     itemQty: int
+     itemImg: str
+
 def LoginValidate(data):
      try:
           return True, LoginResuest(**data)
@@ -72,5 +80,11 @@ def UpdateProductParentIdValidate(data):
 def AddProductValidate(data):
      try:
           return True, AddProduct(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def UpdateItemDetailValidate(data):
+     try:
+          return True, UpdateItemDetail(**data)
      except ValidationError as err:
           return False, err.json()

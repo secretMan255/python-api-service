@@ -1,6 +1,6 @@
 from quart import jsonify, make_response
 from ApiBase.ApiBase import ApiBase
-from validateParam.pydantic import LoginValidate, UpdateProductDescribeValidate, UpdateProductDetailValidate, UpdateProductStatusValidate, DeleteProductValidate, AddProductValidate, UpdateProductParentIdValidate
+from validateParam.pydantic import UpdateItemDetailValidate, LoginValidate, UpdateProductDescribeValidate, UpdateProductDetailValidate, UpdateProductStatusValidate, DeleteProductValidate, AddProductValidate, UpdateProductParentIdValidate
 from MysqlBase.MysqlBase import MysqlService
 
 async def test(request):
@@ -113,3 +113,12 @@ async def onAddProduct(request):
      if not isValid:
           return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
      return await MysqlService.addProduct(data.productName, data.parentId, data.icon, data.describe)
+
+async def onGetItems(request):
+     return await MysqlService.getItems()
+
+async def onUpdateItemDetail(request):
+     isValid, data = UpdateItemDetailValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.updateItemDetail(data.itemId, data.itemName, data.itemParentId, data.itemPrice, data.itemQty, data.itemImg)

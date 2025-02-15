@@ -85,6 +85,16 @@ class MysqlService:
      async def updateProductParentId(cls, originalId: int, newId: int):
           cls.checkMysqlInitial()
           return await cls.exec('sp_update_prodcut_parent_id', [originalId, newId])
+     
+     @classmethod
+     async def getItems(cls):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_get_all_item', [])
+     
+     @classmethod
+     async def updateItemDetail(cls, id: int, itemName: str, parentId: str, price: float, qty: int, img: str):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_update_item_detail', [id, itemName, parentId, price, qty, img])
 
      @classmethod
      def checkMysqlInitial(cls):
