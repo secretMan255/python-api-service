@@ -180,3 +180,39 @@ Main: BEGIN
     WHERE p_id = p_original_parent_id;
 END Main $$
 DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_get_all_item` $$
+CREATE PROCEDURE `sp_get_all_item`()
+Main: BEGIN
+	SELECT id, name, `describe`, price, qty, img, p_id AS parentId, shipping_fee, shippingFee, status, createAt AS createTime
+    FROM pnk.items;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_update_item_detail` $$
+CREATE PROCEDURE `sp_update_item_detail`(
+	IN p_item_id INT,
+    IN p_item_name VARCHAR(45),
+    IN p_parent_id int,
+    IN p_item_price DECIMAL(7, 2),
+    IN p_qty INT,
+    IN p_img VARCHAR(45)
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF p_item_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    UPDATE pnk.items
+    SET name = p_item_name, price = p_item_price, p_id = p_parent_id, qty = p_qty, img = p_img
+    WHERE id = p_item_id;
+    
+    SELECT p_item_id, p_item_name, p_parent_id, p_item_price, p_qty, p_img;
+END Main $$
+DELIMITER ;
