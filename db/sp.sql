@@ -216,3 +216,114 @@ Main: BEGIN
     SELECT p_item_id, p_item_name, p_parent_id, p_item_price, p_qty, p_img;
 END Main $$
 DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_update_item_describe` $$
+CREATE PROCEDURE `sp_update_item_describe`(
+	IN p_item_id INT,
+    IN p_describe VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF p_item_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    UPDATE pnk.items
+    SET `describe` = p_describe
+    WHERE id = p_item_id;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_update_item_status` $$
+CREATE PROCEDURE `sp_update_item_status`(
+	IN p_item_id INT,
+    IN p_status INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF p_item_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    UPDATE pnk.items
+    SET status = p_status
+    WHERE id = p_item_id;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_delete_item` $$
+CREATE PROCEDURE `sp_delete_item`(
+	IN p_item_id INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF p_item_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    DELETE FROM pnk.items
+    WHERE id = p_item_id;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_update_item_parent_id` $$
+CREATE PROCEDURE `sp_update_item_parent_id`(
+	IN p_origin_id INT,
+    IN p_new_id INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF p_origin_id IS NULL THEN
+		call sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    UPDATE pnk.items
+    SET p_id = p_new_id
+    WHERE p_id = p_origin_id;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_add_item` $$
+CREATE PROCEDURE `sp_add_item`(
+	IN p_item_name VARCHAR(45),
+    IN p_parent_id INT,
+    IN p_quantity INT,
+    IN p_price DECIMAL(7, 2),
+    IN p_image VARCHAR(45),
+    IN p_describe VARCHAR(500)
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+	START TRANSACTION;
+    
+    IF p_item_name = '' OR p_price IS NULL OR p_quantity IS NULL OR p_parent_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    INSERT INTO pnk.items(name, `describe`, price, qty, img, p_id, shipping_fee, status, createAt)
+    VALUES (p_item_name, p_describe, p_price, p_quantity, p_image, p_parent_id, 0, 1, utc_timestamp());
+    
+    SELECT LAST_INSERT_ID() AS itemId;
+    COMMIT;
+END Main $$
+DELIMITER ;

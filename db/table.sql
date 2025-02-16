@@ -12,7 +12,11 @@ CREATE TABLE `admin`.`user` (
 
 ALTER TABLE `admin`.`user` 
 CHANGE COLUMN `updateAt` `lastLoginAt` DATETIME NULL DEFAULT NULL AFTER `password`;
+
 ALTER TABLE `pnk`.`items` 
 ADD COLUMN `createAt` VARCHAR(45) NULL AFTER `status`;
+
+ALTER TABLE `pnk`.`items` 
+CHANGE COLUMN `describe` `describe` VARCHAR(500) NULL DEFAULT NULL ;
 
 -- GRANT ALL PRIVILEGES ON `admin`.* TO `root`@`localhost`;
