@@ -1,6 +1,6 @@
 from quart import jsonify, make_response
 from ApiBase.ApiBase import ApiBase
-from validateParam.pydantic import UpdateItemDetailValidate, LoginValidate, UpdateProductDescribeValidate, UpdateProductDetailValidate, UpdateProductStatusValidate, DeleteProductValidate, AddProductValidate, UpdateProductParentIdValidate
+from validateParam.pydantic import AddItemValidate, UpdateItemParentIdValidate, DeleteItemValidate, UpdateItemStatusValidate, UpdateItemDescribeValidate, UpdateItemDetailValidate, LoginValidate, UpdateProductDescribeValidate, UpdateProductDetailValidate, UpdateProductStatusValidate, DeleteProductValidate, AddProductValidate, UpdateProductParentIdValidate
 from MysqlBase.MysqlBase import MysqlService
 
 async def test(request):
@@ -122,3 +122,33 @@ async def onUpdateItemDetail(request):
      if not isValid:
           return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
      return await MysqlService.updateItemDetail(data.itemId, data.itemName, data.itemParentId, data.itemPrice, data.itemQty, data.itemImg)
+
+async def onUpdateItemDescribe(request):
+     isValid, data = UpdateItemDescribeValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.updateItemDescribe(data.itemId, data.itemDescribe)
+
+async def onUpdateItemStatus(request):
+     isValid, data = UpdateItemStatusValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.updateItemStatus(data.itemId, data.status)
+
+async def onDeleteItem(request):
+     isValid, data = DeleteItemValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.deleteItem(data.itemId)
+
+async def onUpdateItemParentId(request):
+     isValid, data = UpdateItemParentIdValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.updateItemParentId(data.originalParentId, data.newParentId)
+     
+async def onAddItem(request):
+     isValid, data = AddItemValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.addItem(data.itemName, data.parentId, data.quantity, data.price, data.image, data.describe)

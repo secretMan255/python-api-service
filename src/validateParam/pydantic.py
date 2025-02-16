@@ -41,6 +41,29 @@ class UpdateItemDetail(BaseModel):
      itemQty: int
      itemImg: str
 
+class UpdateItemDescribe(BaseModel):
+     itemId: int
+     itemDescribe: str
+
+class UpdateItemStatus(BaseModel):
+     itemId: List[int]
+     status: int
+
+class DeleteItem(BaseModel):
+     itemId: List[int]
+
+class UpdateItemParentId(BaseModel):
+     originalParentId: int
+     newParentId: int
+
+class AddItem(BaseModel):
+     itemName: str
+     parentId: int
+     quantity: int
+     price: int
+     image: str
+     describe: str
+
 def LoginValidate(data):
      try:
           return True, LoginResuest(**data)
@@ -86,5 +109,35 @@ def AddProductValidate(data):
 def UpdateItemDetailValidate(data):
      try:
           return True, UpdateItemDetail(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def UpdateItemDescribeValidate(data):
+     try:
+          return True, UpdateItemDescribe(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def UpdateItemStatusValidate(data):
+     try:
+          return True, UpdateItemStatus(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def DeleteItemValidate(data):
+     try:
+          return True, DeleteItem(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def UpdateItemParentIdValidate(data):
+     try:
+          return True, UpdateItemParentId(**data)
+     except ValidationError as err:
+          return False, err.json()
+
+def AddItemValidate(data):
+     try:
+          return True, AddItem(**data)
      except ValidationError as err:
           return False, err.json()

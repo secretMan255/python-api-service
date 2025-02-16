@@ -95,6 +95,33 @@ class MysqlService:
      async def updateItemDetail(cls, id: int, itemName: str, parentId: str, price: float, qty: int, img: str):
           cls.checkMysqlInitial()
           return await cls.exec('sp_update_item_detail', [id, itemName, parentId, price, qty, img])
+     
+     @classmethod
+     async def updateItemDescribe(cls, id: int, describe: str):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_update_item_describe', [id, describe])
+
+     @classmethod
+     async def updateItemStatus(cls, itemId: List[int], status: int):
+          cls.checkMysqlInitial()
+          await asyncio.gather(*[cls.exec('sp_update_item_status', [x, status]) for x in itemId])
+          return 
+
+     @classmethod
+     async def deleteItem(cls, itemId: List[int]):
+          cls.checkMysqlInitial()
+          await asyncio.gather(*[cls.exec('sp_delete_item', [x]) for x in itemId]) 
+          return 
+     
+     @classmethod
+     async def updateItemParentId(cls, originalId: int, newId: int):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_update_item_parent_id', [originalId, newId])
+     
+     @classmethod
+     async def addItem(cls, itemName: str, parentId: int, quantity: int, price: int, image: str ,describe: str):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_add_item', [itemName, parentId, quantity, price, image, describe])
 
      @classmethod
      def checkMysqlInitial(cls):
