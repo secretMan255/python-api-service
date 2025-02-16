@@ -1,7 +1,7 @@
 import os
 from ApiBase.ApiBase import ApiBase
 from commond.commond import Auth
-from .middleware import test, onLogin, onLogout, onGetProducts, onUpdateProductDescribe, onUpdateProductPerantId, onUpdateProductDetail, onUpdateProductStatus, onDeleteProduct, onAddProduct, onGetItems, onUpdateItemDetail
+from .middleware import onAddItem, onUpdateItemParentId, onDeleteItem, onUpdateItemStatus, onUpdateItemDescribe, test, onLogin, onLogout, onGetProducts, onUpdateProductDescribe, onUpdateProductPerantId, onUpdateProductDetail, onUpdateProductStatus, onDeleteProduct, onAddProduct, onGetItems, onUpdateItemDetail
 
 version = os.path.basename(os.path.dirname(__file__))
 
@@ -20,3 +20,8 @@ ApiBase.post(f'/{version}/delete/product', onDeleteProduct, ['admin'], Auth.Cook
 ApiBase.post(f'/{version}/update/product/parentId', onUpdateProductPerantId, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/add/product', onAddProduct, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/update/item/detail', onUpdateItemDetail, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/update/item/describe', onUpdateItemDescribe, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/update/item/status', onUpdateItemStatus, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/delete/item', onDeleteItem, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/update/item/parentId', onUpdateItemParentId, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/add/item', onAddItem, ['admin'], Auth.Cookie)
