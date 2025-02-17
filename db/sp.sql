@@ -327,3 +327,80 @@ Main: BEGIN
     COMMIT;
 END Main $$
 DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_get_carousel` $$
+CREATE PROCEDURE `sp_get_carousel`()
+Main: BEGIN
+	SELECT id, name, p_id AS parentId
+    FROM pnk.image;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_update_carousel` $$
+CREATE PROCEDURE `sp_update_carousel`(
+	IN p_id INT,
+	IN p_name VARCHAR(45),
+    IN p_parent_id INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+
+	IF p_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+	END IF;
+    
+	UPDATE pnk.image
+    SET name = p_name, p_id = p_parent_id
+    WHERE id = p_id;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_add_carousel` $$
+CREATE PROCEDURE `sp_add_carousel`(
+	IN p_name VARCHAR(45),
+    IN p_parentId INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+	START TRANSACTION;
+
+	IF p_name IS NULL OR p_name = '' OR p_parentId IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    INSERT INTO pnk.image (name, p_id, status)
+    VALUE (p_name, p_parentID, 1);
+    
+    SELECT LAST_INSERT_ID() AS itemId;
+    COMMIT;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_update_carousel_parent_id` $$
+CREATE PROCEDURE `sp_update_carousel_parent_id`(
+	IN p_origin_id INT,
+    IN p_new_id INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF p_origin_id IS NULL OR p_new_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+	UPDATE pnk.image
+    SET p_id = p_new_id
+    WHERE p_id = p_origin_id;
+END Main $$
+DELIMITER ;
