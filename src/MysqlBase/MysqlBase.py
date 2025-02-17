@@ -11,12 +11,15 @@ class MysqlService:
      async def init(self):
           try:
                if self.Instance is None:
+                    unix_socket_path = f"/cloudsql/{os.getenv('INSTANCE_CONNECTION_NAME')}"
+
                     self.Instance = await aiomysql.create_pool(
                          host=os.getenv('DB_HOST'),
                          user=os.getenv('DB_USER'),
                          port=int(os.getenv('DB_PORT')),
                          password=os.getenv('DB_PASS'),
                          db=os.getenv('DB_NAME'),
+                         # unix_socket=unix_socket_path,
                          autocommit=True,
                     )
                     # self.cursor = self.Instance.cursor(dictionary=True)
@@ -122,6 +125,33 @@ class MysqlService:
      async def addItem(cls, itemName: str, parentId: int, quantity: int, price: int, image: str ,describe: str):
           cls.checkMysqlInitial()
           return await cls.exec('sp_add_item', [itemName, parentId, quantity, price, image, describe])
+
+     @classmethod
+     async def getCarousel(cls):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_get_carousel')
+     
+     @classmethod
+     async def updateCarousel(cls, id: int, name: str, parentId: int):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_update_carousel', [id, name, parentId])
+     
+     @classmethod
+     async def addCarousel(cls, name: str, parentId: int):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_add_carousel' , [name, parentId])
+     
+     @classmethod
+     async def deleteCarousel(cls, id: List[int]):
+          cls.checkMysqlInitial()
+          await asyncio.gather(*[cls.exec('sp_delete_carousel', [x]) for x in id]) 
+          return 
+
+
+     @classmethod
+     async def updateCarouselParentId(cls, originId: int , newId: int):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_update_carousel_parent_id', [originId, newId])
 
      @classmethod
      def checkMysqlInitial(cls):

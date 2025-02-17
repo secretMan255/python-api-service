@@ -64,6 +64,18 @@ class AddItem(BaseModel):
      image: str
      describe: str
 
+class UpdateCarousel(BaseModel):
+     id: int
+     name: str
+     parentId: int
+
+class AddCarousel(BaseModel):
+     name: str
+     parentId: int
+
+class DeleteCarousel(BaseModel):
+     id: List[int]
+
 def LoginValidate(data):
      try:
           return True, LoginResuest(**data)
@@ -139,5 +151,29 @@ def UpdateItemParentIdValidate(data):
 def AddItemValidate(data):
      try:
           return True, AddItem(**data)
+     except ValidationError as err:
+          return False, err.json()
+
+def UpdateCarouselParentIdValidate(data):
+     try:
+          return True, UpdateItemParentId(**data)
+     except ValidationError as err:
+          return False, err.json()
+
+def CarouselValidate(data):
+     try:
+          return True, UpdateCarousel(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def AddCarouselValidate(data):
+     try:
+          return True, AddCarousel(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def DeleteCarouselValidate(data):
+     try:
+          return True, DeleteCarousel(**data)
      except ValidationError as err:
           return False, err.json()

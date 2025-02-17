@@ -1,6 +1,6 @@
 from quart import jsonify, make_response
 from ApiBase.ApiBase import ApiBase
-from validateParam.pydantic import AddItemValidate, UpdateItemParentIdValidate, DeleteItemValidate, UpdateItemStatusValidate, UpdateItemDescribeValidate, UpdateItemDetailValidate, LoginValidate, UpdateProductDescribeValidate, UpdateProductDetailValidate, UpdateProductStatusValidate, DeleteProductValidate, AddProductValidate, UpdateProductParentIdValidate
+from validateParam.pydantic import DeleteCarouselValidate, AddCarouselValidate, CarouselValidate, AddItemValidate, UpdateItemParentIdValidate, DeleteItemValidate, UpdateItemStatusValidate, UpdateItemDescribeValidate, UpdateItemDetailValidate, LoginValidate, UpdateProductDescribeValidate, UpdateProductDetailValidate, UpdateProductStatusValidate, DeleteProductValidate, AddProductValidate, UpdateProductParentIdValidate
 from MysqlBase.MysqlBase import MysqlService
 
 async def test(request):
@@ -152,3 +152,30 @@ async def onAddItem(request):
      if not isValid:
           return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
      return await MysqlService.addItem(data.itemName, data.parentId, data.quantity, data.price, data.image, data.describe)
+
+async def onGetCarousel(request):
+     return await MysqlService.getCarousel()
+
+async def onUpdateCarousel(request):
+     isValid, data = CarouselValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.updateCarousel(data.id, data.name, data.parentId)
+
+async def onAddCarousel(request):
+     isValid, data = AddCarouselValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.addCarousel(data.name, data.parentId)
+
+async def onDeleteCarousel(request):
+     isValid, data = DeleteCarouselValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.deleteCarousel(data.id)
+
+async def onUpdateCarouselId(request):
+     isValid, data = UpdateItemParentIdValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.updateCarouselParentId(data.originalParentId, data.newParentId)
