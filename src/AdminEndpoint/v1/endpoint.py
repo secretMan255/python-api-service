@@ -1,7 +1,7 @@
 import os
 from ApiBase.ApiBase import ApiBase
 from commond.commond import Auth
-from .middleware import onAddItem, onUpdateItemParentId, onDeleteItem, onUpdateItemStatus, onUpdateItemDescribe, test, onLogin, onLogout, onGetProducts, onUpdateProductDescribe, onUpdateProductPerantId, onUpdateProductDetail, onUpdateProductStatus, onDeleteProduct, onAddProduct, onGetItems, onUpdateItemDetail
+from .middleware import onUpdateCarouselId, onDeleteCarousel, onAddCarousel, onUpdateCarousel, onGetCarousel, onAddItem, onUpdateItemParentId, onDeleteItem, onUpdateItemStatus, onUpdateItemDescribe, test, onLogin, onLogout, onGetProducts, onUpdateProductDescribe, onUpdateProductPerantId, onUpdateProductDetail, onUpdateProductStatus, onDeleteProduct, onAddProduct, onGetItems, onUpdateItemDetail
 
 version = os.path.basename(os.path.dirname(__file__))
 
@@ -9,6 +9,7 @@ version = os.path.basename(os.path.dirname(__file__))
 ApiBase.get(f'/{version}/test', test, ['admin'], Auth.Bearer)
 ApiBase.get(f'/{version}/products', onGetProducts, ['admin'], Auth.Bearer)
 ApiBase.get(f'/{version}/items', onGetItems, ['admin'], Auth.Bearer)
+ApiBase.get(f'/{version}/carousel/image', onGetCarousel, ['admin'], Auth.Bearer)
 
 # POST
 ApiBase.post(f'/{version}/login', onLogin, ['admin'], Auth.Bearer)
@@ -25,3 +26,7 @@ ApiBase.post(f'/{version}/update/item/status', onUpdateItemStatus, ['admin'], Au
 ApiBase.post(f'/{version}/delete/item', onDeleteItem, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/update/item/parentId', onUpdateItemParentId, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/add/item', onAddItem, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/update/carousel', onUpdateCarousel, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/add/carousel', onAddCarousel, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/delete/carousel', onDeleteCarousel, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/update/carousel/parentid', onUpdateCarouselId, ['admin'], Auth.Cookie)
