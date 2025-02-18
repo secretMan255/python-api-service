@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ValidationError
-from typing import Optional, List
+from typing import Dict, Optional, List
 
 class LoginResuest(BaseModel):
      username: str
@@ -81,6 +81,13 @@ class DeleteMainProduct(BaseModel):
 
 class AddMainProduct(BaseModel):
      id: int
+
+class UploadCloudFile(BaseModel):
+     fileName: str
+     fileData: str
+
+class DeleteCloudFile(BaseModel):
+     fileName: List[str]
 
 def LoginValidate(data):
      try:
@@ -193,5 +200,17 @@ def DeleteMainProductValidate(data):
 def AddMainProductValidate(data):
      try:
           return True, AddMainProduct(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def UploadCloudFileValidate(data):
+     try:
+          return True, UploadCloudFile(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def DeleteCloudFileValidate(data):
+     try:
+          return True, DeleteCloudFile(**data)
      except ValidationError as err:
           return False, err.json()

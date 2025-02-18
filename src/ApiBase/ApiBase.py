@@ -92,6 +92,12 @@ class ApiBase:
                     if isinstance(result, dict) and result.get('type') == ResultType.IMAGE.value:
                          return await send_file(result.get('image'), mimetype='image/jpeg')
                     else:
+                         if result is not None:
+                              jsonResult = await result.json()
+
+                              if 'res' in jsonResult and 'errMsg' in jsonResult:
+                                   return jsonify({'ret': Res.FAIL.value, 'data': jsonResult}), 500
+
                          return jsonify({'ret': Res.SUCCESS.value, 'data': result}), 200
                except Exception as err:
                     print(f'API GET error: {err}')
@@ -125,6 +131,12 @@ class ApiBase:
 
                     if isinstance(result, (Response)):
                          return result
+
+                    if result is not None:
+                         jsonResult = await result.json()
+
+                         if 'res' in jsonResult and 'errMsg' in jsonResult:
+                              return jsonify({'ret': Res.FAIL.value, 'data': jsonResult}), 500
 
                     return jsonify({'ret': Res.SUCCESS.value, 'data': result}), 200
                except Exception as e:
