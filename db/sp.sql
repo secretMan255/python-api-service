@@ -110,7 +110,8 @@ Main: BEGIN
     
     UPDATE pnk.products PDT
     LEFT JOIN pnk.items ITM ON PDT.id = ITM.p_id
-    SET PDT.status = p_status, ITM.status = p_status
+    LEFT JOIN pnk.main_product MAIN ON PDT.id = MAIN.p_id
+    SET PDT.status = p_status, ITM.status = p_status, MAIN.status = p_status
     WHERE PDT.id = p_product_id OR PDT.p_id = p_product_id;
 END Main $$
 DELIMITER ;
@@ -136,6 +137,7 @@ Main: BEGIN
     SET PDT.status = 0, ITM.status = 0
     WHERE PDT.p_id = p_id OR ITM.p_id = p_id;
     
+    DELETE FROM pnk.main_product MAIN WHERE MAIN.p_id = p_id; 
     DELETE FROM pnk.products WHERE id = p_id;
     
     COMMIT;
@@ -402,5 +404,63 @@ Main: BEGIN
 	UPDATE pnk.image
     SET p_id = p_new_id
     WHERE p_id = p_origin_id;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_get_main_product` $$
+CREATE PROCEDURE `sp_get_main_product`()
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    SELECT MAIN.id, MAIN.p_id AS parentId, PRO.name
+    FROM pnk.main_product MAIN
+    INNER JOIN pnk.products PRO ON MAIN.p_id = PRO.id
+    WHERE PRO.status = 1;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_delete_main_product` $$
+CREATE PROCEDURE `sp_delete_main_product`(
+	IN p_id INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF p_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    DELETE FROM pnk.main_product
+    WHERE id = p_id;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_add_main_product` $$
+CREATE PROCEDURE `sp_add_main_product`(
+	IN p_id INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+	START TRANSACTION;
+    
+    IF p_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+
+	INSERT INTO pnk.main_product (p_id, createAt, status)
+    VALUES (p_id, utc_timestamp(), 1);
+    
+    SELECT LAST_INSERT_ID AS id;
+    
+    COMMIT;
 END Main $$
 DELIMITER ;
