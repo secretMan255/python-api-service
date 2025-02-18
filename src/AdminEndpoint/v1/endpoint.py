@@ -1,7 +1,7 @@
 import os
 from ApiBase.ApiBase import ApiBase
 from commond.commond import Auth
-from .middleware import onAddMainProduct, onDeleteMainProduct, onGetMainProduct, onUpdateCarouselId, onDeleteCarousel, onAddCarousel, onUpdateCarousel, onGetCarousel, onAddItem, onUpdateItemParentId, onDeleteItem, onUpdateItemStatus, onUpdateItemDescribe, test, onLogin, onLogout, onGetProducts, onUpdateProductDescribe, onUpdateProductPerantId, onUpdateProductDetail, onUpdateProductStatus, onDeleteProduct, onAddProduct, onGetItems, onUpdateItemDetail
+from .middleware import onDeleteCloudFile, onUploadCouldFile, onGetCloudStorage, onAddMainProduct, onDeleteMainProduct, onGetMainProduct, onUpdateCarouselId, onDeleteCarousel, onAddCarousel, onUpdateCarousel, onGetCarousel, onAddItem, onUpdateItemParentId, onDeleteItem, onUpdateItemStatus, onUpdateItemDescribe, test, onLogin, onLogout, onGetProducts, onUpdateProductDescribe, onUpdateProductPerantId, onUpdateProductDetail, onUpdateProductStatus, onDeleteProduct, onAddProduct, onGetItems, onUpdateItemDetail
 
 version = os.path.basename(os.path.dirname(__file__))
 
@@ -11,6 +11,7 @@ ApiBase.get(f'/{version}/products', onGetProducts, ['admin'], Auth.Bearer)
 ApiBase.get(f'/{version}/items', onGetItems, ['admin'], Auth.Bearer)
 ApiBase.get(f'/{version}/carousel/image', onGetCarousel, ['admin'], Auth.Bearer)
 ApiBase.get(f'/{version}/main/product', onGetMainProduct, ['admin'], Auth.Bearer)
+ApiBase.get(f'/{version}/cloud/storage', onGetCloudStorage, ['admin'], Auth.Bearer)
 
 # POST
 ApiBase.post(f'/{version}/login', onLogin, ['admin'], Auth.Bearer)
@@ -33,3 +34,5 @@ ApiBase.post(f'/{version}/delete/carousel', onDeleteCarousel, ['admin'], Auth.Co
 ApiBase.post(f'/{version}/update/carousel/parentid', onUpdateCarouselId, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/delete/main/product', onDeleteMainProduct, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/add/main/product', onAddMainProduct, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/upload/cloud/file', onUploadCouldFile, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/delete/cloud/file', onDeleteCloudFile, ['admin'], Auth.Cookie)
