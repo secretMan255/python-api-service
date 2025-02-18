@@ -1,5 +1,6 @@
 from ApiBase.ApiBase import ApiBase
 from MysqlBase.MysqlBase import MysqlService
+from googleCloudStorage.storage import GoogleCloudStorage
 
 class Service:
      def __init__(self, host: str = None, port: int = None):
@@ -15,6 +16,7 @@ class Service:
           return instance
 
      async def ServiceStart(self):
+          await GoogleCloudStorage.init()
           await MysqlService.init()
           await ApiBase.start(self.host, self.port)
 

@@ -1,0 +1,49 @@
+import os
+from typing import List
+from google.cloud import storage
+import asyncio
+
+class GoogleCloudStorage:
+     client = None
+     bucket = None
+
+     @classmethod
+     async def init(cls):
+          if cls.client is None:
+               cls.client = storage.Client()
+               cls.bucket = cls.client.bucket(os.getenv('BUKCET'))
+               print('Google cloud storate client initialized')
+
+     @classmethod
+     async def fileList(cls):
+          if cls.client is None:
+               cls.init()
+          
+          blobs = cls.bucket.list_blobs()
+          return {'files': [blob.name for blob in blobs]}
+     
+     @classmethod
+     async def deleteFile(cls, fileName: List[str]):
+          if cls.client is None:
+               cls.init()
+
+          try:
+               for name in fileName:
+                    blob = cls.bucket.blob(name)
+                    blob.delete()
+          except Exception as err:
+               return {'errMsg' : err}
+          
+     @classmethod
+     async def uploadFile(cls, name: str, fileData: str):
+          if cls.client is None:
+               cls.init()
+          try:
+               # data = bytes([fileData[i] for i in sorted(fileData.keys(), key=int)])
+               data = bytes.fromhex(fileData)
+               blob = cls.bucket.blob(name)
+               blob.upload_from_string(data, content_type='image/jpeg')
+          except Exception as err:
+               return {'errMsg': err}
+
+     
