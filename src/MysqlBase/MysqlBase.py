@@ -147,11 +147,40 @@ class MysqlService:
           await asyncio.gather(*[cls.exec('sp_delete_carousel', [x]) for x in id]) 
           return 
 
-
      @classmethod
      async def updateCarouselParentId(cls, originId: int , newId: int):
           cls.checkMysqlInitial()
           return await cls.exec('sp_update_carousel_parent_id', [originId, newId])
+
+     @classmethod
+     async def getMainProduct(cls):
+          cls.checkMysqlInitial()
+          async with cls.Instance.acquire() as conn:
+               async with conn.cursor(aiomysql.DictCursor) as cursor:
+                    await cursor.execute("CALL sp_get_main_product()")
+                    
+                    # Fetch first result set (Main Products)
+                    main_products = await cursor.fetchall()
+                    
+                    # Move to the second result set (Available Products)
+                    await cursor.nextset()
+                    available_products = await cursor.fetchall()
+          return {
+               "mainProducts": main_products,
+               "availableProducts": available_products
+          }
+     
+     @classmethod
+     async def deleteMainProduct(cls, id: List[int]):
+          cls.checkMysqlInitial()
+          await asyncio.gather(*[cls.exec('sp_delete_main_product', [x]) for x in id]) 
+          return
+     
+     @classmethod
+     async def addMainProduct(cls, id: int):
+          cls.checkMysqlInitial()
+          return await cls.exec('sp_add_main_product', [id])
+          
 
      @classmethod
      def checkMysqlInitial(cls):

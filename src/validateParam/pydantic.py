@@ -76,6 +76,12 @@ class AddCarousel(BaseModel):
 class DeleteCarousel(BaseModel):
      id: List[int]
 
+class DeleteMainProduct(BaseModel):
+     id: List[int]
+
+class AddMainProduct(BaseModel):
+     id: int
+
 def LoginValidate(data):
      try:
           return True, LoginResuest(**data)
@@ -175,5 +181,17 @@ def AddCarouselValidate(data):
 def DeleteCarouselValidate(data):
      try:
           return True, DeleteCarousel(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def DeleteMainProductValidate(data):
+     try:
+          return True, DeleteMainProduct(**data)
+     except ValidationError as err:
+          return False, err.json()
+     
+def AddMainProductValidate(data):
+     try:
+          return True, AddMainProduct(**data)
      except ValidationError as err:
           return False, err.json()

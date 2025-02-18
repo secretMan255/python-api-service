@@ -1,6 +1,6 @@
 from quart import jsonify, make_response
 from ApiBase.ApiBase import ApiBase
-from validateParam.pydantic import DeleteCarouselValidate, AddCarouselValidate, CarouselValidate, AddItemValidate, UpdateItemParentIdValidate, DeleteItemValidate, UpdateItemStatusValidate, UpdateItemDescribeValidate, UpdateItemDetailValidate, LoginValidate, UpdateProductDescribeValidate, UpdateProductDetailValidate, UpdateProductStatusValidate, DeleteProductValidate, AddProductValidate, UpdateProductParentIdValidate
+from validateParam.pydantic import AddMainProductValidate, DeleteMainProductValidate, DeleteCarouselValidate, AddCarouselValidate, CarouselValidate, AddItemValidate, UpdateItemParentIdValidate, DeleteItemValidate, UpdateItemStatusValidate, UpdateItemDescribeValidate, UpdateItemDetailValidate, LoginValidate, UpdateProductDescribeValidate, UpdateProductDetailValidate, UpdateProductStatusValidate, DeleteProductValidate, AddProductValidate, UpdateProductParentIdValidate
 from MysqlBase.MysqlBase import MysqlService
 
 async def test(request):
@@ -179,3 +179,19 @@ async def onUpdateCarouselId(request):
      if not isValid:
           return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
      return await MysqlService.updateCarouselParentId(data.originalParentId, data.newParentId)
+
+async def onGetMainProduct(request):
+     return await MysqlService.getMainProduct()
+
+async def onDeleteMainProduct(request):
+     isValid, data = DeleteMainProductValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.deleteMainProduct(data.id)
+
+async def onAddMainProduct(request):
+     isValid, data = AddMainProductValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     print('id: ' , data.id)
+     return await MysqlService.addMainProduct(data.id)
