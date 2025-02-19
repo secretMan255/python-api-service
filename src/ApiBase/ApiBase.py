@@ -32,7 +32,7 @@ class ApiBase:
                load_dotenv()
 
                # cors config
-               self.app = cors(self.app, allow_origin=os.getenv('ALLOWED_ORIGINS', '*'), allow_credentials=True)
+               self.app = cors(self.app, allow_origin=os.getenv('ALLOWED_ORIGINS'), allow_credentials=True, allow_headers=["Content-Type", "Authorization"])
 
           
           # token secret
@@ -128,7 +128,10 @@ class ApiBase:
                     result = await handler(json_data)
                     print("Result:", result)
 
-                    if isinstance(result, (Response)):
+                    if isinstance(result, dict):
+                         return jsonify({'ret': Res.SUCCESS.value, 'data': result}), 200
+                    
+                    if isinstance(result, Response):  
                          return result
 
                     if result is not None:
