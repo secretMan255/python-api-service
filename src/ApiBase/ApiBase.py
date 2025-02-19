@@ -46,9 +46,8 @@ class ApiBase:
      @classmethod
      async def start(cls, host: str = None, port: int = None):
           cls.checkInit()
-
-          resolveHost = os.getenv('HOST', host or '127.0.0.1')
-          resolvePort = int(os.getenv('PORT', port or 8080))
+          resolveHost = os.getenv('HOST', '0.0.0.0')
+          resolvePort = int(os.getenv('PORT')) # int(os.getenv('PORT', port or 8080))
           print('API service started...')
           
           await cls.app.run_task(host=resolveHost, port=resolvePort)
