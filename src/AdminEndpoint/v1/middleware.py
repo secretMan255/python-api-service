@@ -37,7 +37,7 @@ async def onLogin(request):
                'authToken',
                token,
                httponly=True,  # Prevent JavaScript access
-               secure=False,  # HTTPS only
+               secure=True,  # HTTPS only
                samesite='Strict',  # Prevent CSRF
                max_age=3600,  # 1 hour expiration
                path='/'
