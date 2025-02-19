@@ -18,7 +18,7 @@ Main: BEGIN
 END Main $$
 DELIMITER ;
 
-DELIMTIER $$
+DELIMITER $$
 DROP PROCEDURE IF EXISTS `sp_update_admin_last_login` $$
 CREATE PROCEDURE `sp_update_admin_last_login`(
 	IN p_username VARCHAR(45)
