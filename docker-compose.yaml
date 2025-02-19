@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  api-service:
+    container_name: python-api-service
+    image: python-api-service:latest  # Ensure this matches your built image name
+    build: .
+    restart: always
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+      - BUCKET=
+      - HOST=
+      - PORT=
+      - ALLOWED_ORIGINS=
+      - SECRET_KEY=
+      - DB_HOST=
+      - DB_PORT=
+      - DB_USER=
+      - DB_PASS=
+      - DB_NAME=
+      - INSTANCE_CONNECTION_NAME=
+      - BUKCET=
+      - PYTHONPATH=
+    volumes:
+      # - ./credentials.json:/app/credentials.json  # Mount Google Cloud credentials securely
+      - ./src:/app  # Mount your source code (optional if built into the image)
+    ports:
+      - "8080:8080"  # Map container port to host
