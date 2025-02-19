@@ -14,12 +14,12 @@ class MysqlService:
                     unix_socket_path = f"/cloudsql/{os.getenv('INSTANCE_CONNECTION_NAME')}"
 
                     self.Instance = await aiomysql.create_pool(
-                         host=os.getenv('DB_HOST'),
+                         # host=os.getenv('DB_HOST'),
                          user=os.getenv('DB_USER'),
-                         port=int(os.getenv('DB_PORT')),
+                         # port=int(os.getenv('DB_PORT')),
                          password=os.getenv('DB_PASS'),
                          db=os.getenv('DB_NAME'),
-                         # unix_socket=unix_socket_path,
+                         unix_socket=unix_socket_path,
                          autocommit=True,
                     )
                     # self.cursor = self.Instance.cursor(dictionary=True)
