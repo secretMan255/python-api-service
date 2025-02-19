@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ValidationError
-from typing import Dict, Optional, List
+from typing import Optional, List
 
 class LoginResuest(BaseModel):
      username: str
