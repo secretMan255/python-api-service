@@ -36,10 +36,10 @@ async def onLogin(request):
           response.set_cookie(
                'authToken',
                token,
-               httponly=True,  # Prevent JavaScript access
-               secure=True,  # HTTPS only
-               samesite='Strict',  # Prevent CSRF
-               max_age=3600,  # 1 hour expiration
+               httponly=True,  
+               secure=True,    
+               samesite='None',  
+               max_age=3600,  
                path='/'
           )
 
