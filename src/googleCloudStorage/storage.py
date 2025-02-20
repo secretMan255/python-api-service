@@ -1,7 +1,6 @@
 import os
 from typing import List
 from google.cloud import storage
-import asyncio
 
 class GoogleCloudStorage:
      client = None
@@ -10,9 +9,10 @@ class GoogleCloudStorage:
      @classmethod
      async def init(cls):
           if cls.client is None:
+               credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
                cls.client = storage.Client()
-               cls.bucket = cls.client.bucket(os.getenv('BUKCET'))
-               print('Google cloud storate client initialized')
+               cls.bucket = cls.client.bucket(os.getenv('BUCKET'))
+               print('Google Cloud Storage Client initialized')
 
      @classmethod
      async def fileList(cls):
