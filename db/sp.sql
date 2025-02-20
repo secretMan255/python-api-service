@@ -187,7 +187,7 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS `sp_get_all_item` $$
 CREATE PROCEDURE `sp_get_all_item`()
 Main: BEGIN
-	SELECT id, name, `describe`, price, qty, img, p_id AS parentId, shipping_fee, shippingFee, status, createAt AS createTime
+	SELECT id, name, `describe`, price, qty, img, p_id AS parentId, shipping_fee AS shippingFee, status, createAt AS createTime
     FROM pnk.items;
 END Main $$
 DELIMITER ;
