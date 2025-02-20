@@ -32,7 +32,7 @@ class ApiBase:
                load_dotenv()
 
                # cors config
-               self.app = cors(self.app, allow_origin=os.getenv('ALLOWED_ORIGINS'), allow_credentials=True, allow_headers=["Content-Type", "Authorization"])
+               self.app = cors(self.app, allow_origin=os.getenv('ALLOWED_ORIGINS'), allow_credentials=True, allow_headers=["Content-Type", "Authorization"],expose_headers=["Set-Cookie"],allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"])
 
           
           # token secret
@@ -47,7 +47,7 @@ class ApiBase:
      async def start(cls, host: str = None, port: int = None):
           cls.checkInit()
           resolveHost = os.getenv('HOST', '0.0.0.0')
-          resolvePort = int(os.getenv('PORT')) # int(os.getenv('PORT', port or 8080))
+          resolvePort = os.getenv('PORT') # int(os.getenv('PORT', port or 8080))
           print('API service started...')
           
           await cls.app.run_task(host=resolveHost, port=resolvePort)
@@ -92,12 +92,18 @@ class ApiBase:
                          return await send_file(result.get('image'), mimetype='image/jpeg')
                     else:
                          if result is not None:
-                              jsonResult = await result.json()
+                              if isinstance(result, list):
+                                   jsonResult = result
+                              elif isinstance(result, dict):
+                                   jsonResult = result
+                              else:
+                                   raise TypeError(f"Unexpected result type: {type(result)}")  # Debugging check
 
-                              if 'res' in jsonResult and 'errMsg' in jsonResult:
+                              # Check if response contains an error
+                              if isinstance(jsonResult, dict) and 'res' in jsonResult and 'errMsg' in jsonResult:
                                    return jsonify({'ret': Res.FAIL.value, 'data': jsonResult}), 500
 
-                         return jsonify({'ret': Res.SUCCESS.value, 'data': result}), 200
+                              return jsonify({'ret': Res.SUCCESS.value, 'data': jsonResult}), 200
                except Exception as err:
                     print(f'API GET error: {err}')
                     return jsonify({'ret': Res.FAIL.value, 'msg': str(err)}), 500
