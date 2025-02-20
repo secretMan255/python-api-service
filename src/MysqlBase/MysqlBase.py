@@ -6,14 +6,14 @@ from commond.commond import compareHash
 
 class MysqlService: 
      Instance = None
+     loop = None
 
      @classmethod
-     async def init(self):
+     async def init(cls):
           try:
-               if self.Instance is None:
+               if cls.Instance is None:
                     unix_socket_path = f"/cloudsql/{os.getenv('INSTANCE_CONNECTION_NAME')}"
-
-                    self.Instance = await aiomysql.create_pool(
+                    cls.Instance = await aiomysql.create_pool(
                          # host=os.getenv('DB_HOST'),
                          user=os.getenv('DB_USER'),
                          # port=int(os.getenv('DB_PORT')),
@@ -21,6 +21,7 @@ class MysqlService:
                          db=os.getenv('DB_NAME'),
                          unix_socket=unix_socket_path,
                          autocommit=True,
+                         loop=cls.loop,
                     )
                     # self.cursor = self.Instance.cursor(dictionary=True)
                     print('Mysql service init')
@@ -29,21 +30,28 @@ class MysqlService:
           
      @classmethod
      async def exec(cls, sp: str, data: any = None): 
-          cls.checkMysqlInitial()
-          
-          async with cls.Instance.acquire() as conn:
-               async with conn.cursor(aiomysql.DictCursor) as cursor:
-                    query = f"CALL {sp}({', '.join(['%s'] * len(data))})" if data else f"CALL {sp}()"
-                    await cursor.execute(query, data or ())
+          try:
+               cls.checkMysqlInitial()
+               
+               async with cls.Instance.acquire() as conn:
+                    async with conn.cursor(aiomysql.DictCursor) as cursor:
+                         query = f"CALL {sp}({', '.join(['%s'] * len(data))})" if data else f"CALL {sp}()"
+                         await cursor.execute(query, data or ())
 
-                    await conn.commit()
-                    return await cursor.fetchall()
+                         await conn.commit()
+                         return await cursor.fetchall()
+          except aiomysql.Error as e:
+               print(f"MySQL error: {e}, reconnecting...")
+               await cls.init() 
+               return await cls.exec(sp, data)
      
      @classmethod
      async def login(cls, data):
           cls.checkMysqlInitial()
 
           res = await cls.exec('sp_admin_login', [data.username])
+          if not res:
+               return { 'validate' : False }
           return { 'validate': compareHash(data.password, res[0]["password"]), 'id': res[0]['id']}
 
      @classmethod
@@ -180,7 +188,15 @@ class MysqlService:
      async def addMainProduct(cls, id: int):
           cls.checkMysqlInitial()
           return await cls.exec('sp_add_main_product', [id])
-          
+     
+     @classmethod
+     async def close(cls):
+          if cls.Instance is not None:
+               cls.Instance.close()
+               await cls.Instance.wait_closed()
+               cls.Instance = None
+               print("MySQL service closed.")
+
 
      @classmethod
      def checkMysqlInitial(cls):
