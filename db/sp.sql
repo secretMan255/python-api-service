@@ -1,3 +1,5 @@
+USE `admin`;
+
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `sp_admin_login` $$
 CREATE PROCEDURE `sp_admin_login`(
