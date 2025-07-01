@@ -27,7 +27,7 @@ class AddProduct(BaseModel):
      productName: str
      parentId: Optional[int] = None
      icon: Optional[str] = None
-     describe: Optional[str] = None
+     describe: str = None
 
 class UpdateProductParentId(BaseModel):
      originalParentId: int

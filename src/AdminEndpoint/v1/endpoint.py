@@ -1,7 +1,7 @@
 import os
 from ApiBase.ApiBase import ApiBase
 from commond.commond import Auth
-from .middleware import onDeleteCloudFile, onUploadCouldFile, onGetCloudStorage, onAddMainProduct, onDeleteMainProduct, onGetMainProduct, onUpdateCarouselId, onDeleteCarousel, onAddCarousel, onUpdateCarousel, onGetCarousel, onAddItem, onUpdateItemParentId, onDeleteItem, onUpdateItemStatus, onUpdateItemDescribe, test, onLogin, onLogout, onGetProducts, onUpdateProductDescribe, onUpdateProductPerantId, onUpdateProductDetail, onUpdateProductStatus, onDeleteProduct, onAddProduct, onGetItems, onUpdateItemDetail
+from .middleware import onDeleteMainProductById, onDeleteCarouselById, onDeleteItemByPId, onDeleteCloudFile, onUploadCouldFile, onGetCloudStorage, onAddMainProduct, onDeleteMainProduct, onGetMainProduct, onUpdateCarouselId, onDeleteCarousel, onAddCarousel, onUpdateCarousel, onGetCarousel, onAddItem, onUpdateItemParentId, onDeleteItem, onUpdateItemStatus, onUpdateItemDescribe, test, onLogin, onLogout, onGetProducts, onUpdateProductDescribe, onUpdateProductPerantId, onUpdateProductDetail, onUpdateProductStatus, onDeleteProduct, onAddProduct, onGetItems, onUpdateItemDetail
 
 version = os.path.basename(os.path.dirname(__file__))
 
@@ -26,13 +26,16 @@ ApiBase.post(f'/{version}/update/item/detail', onUpdateItemDetail, ['admin'], Au
 ApiBase.post(f'/{version}/update/item/describe', onUpdateItemDescribe, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/update/item/status', onUpdateItemStatus, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/delete/item', onDeleteItem, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/delete/item/p_id', onDeleteItemByPId, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/update/item/parentId', onUpdateItemParentId, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/add/item', onAddItem, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/update/carousel', onUpdateCarousel, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/add/carousel', onAddCarousel, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/delete/carousel', onDeleteCarousel, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/delete/carousel/p_id', onDeleteCarouselById, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/update/carousel/parentid', onUpdateCarouselId, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/delete/main/product', onDeleteMainProduct, ['admin'], Auth.Cookie)
+ApiBase.post(f'/{version}/delete/main/product/p_id', onDeleteMainProductById, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/add/main/product', onAddMainProduct, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/upload/cloud/file', onUploadCouldFile, ['admin'], Auth.Cookie)
 ApiBase.post(f'/{version}/delete/cloud/file', onDeleteCloudFile, ['admin'], Auth.Cookie)

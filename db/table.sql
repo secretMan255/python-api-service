@@ -19,4 +19,8 @@ ADD COLUMN `createAt` VARCHAR(45) NULL AFTER `status`;
 ALTER TABLE `pnk`.`items` 
 CHANGE COLUMN `describe` `describe` VARCHAR(500) NULL DEFAULT NULL ;
 
+ALTER TABLE `pnk`.`products` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+
+
 -- GRANT ALL PRIVILEGES ON `admin`.* TO `root`@`localhost`;

@@ -16,7 +16,7 @@ class Service:
           return instance
 
      async def ServiceStart(self):
-          await GoogleCloudStorage.init()
+          # await GoogleCloudStorage.init()
           await MysqlService.init()
           await ApiBase.start(self.host, self.port)
 

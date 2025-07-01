@@ -126,33 +126,56 @@ CREATE PROCEDURE `sp_delete_product`(
     SQL SECURITY INVOKER
 Main: BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
-	
-    START TRANSACTION;
-    
-    IF p_id IS NULL THEN
+
+	START TRANSACTION;
+
+	IF p_id IS NULL THEN
 		CALL pnk.sp_err('-1209', 'Invalid param');
-        LEAVE Main;
-    END IF;
-    
-    UPDATE pnk.products PDT
-	LEFT JOIN pnk.items ITM ON PDT.id = ITM.p_id
-    SET PDT.status = 0, ITM.status = 0
-    WHERE PDT.p_id = p_id OR ITM.p_id = p_id;
-    
-    DELETE FROM pnk.main_product MAIN WHERE MAIN.p_id = p_id; 
-    DELETE FROM pnk.products WHERE id = p_id;
-    
-    COMMIT;
+		LEAVE Main;
+	END IF;
+	--	
+	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_product_ids (
+		id INT PRIMARY KEY
+	);
+
+	TRUNCATE TABLE tmp_product_ids;
+
+	INSERT INTO tmp_product_ids(id)
+	SELECT id
+	FROM (
+		WITH RECURSIVE product_tree AS (
+			SELECT id FROM pnk.products WHERE id = p_id
+			UNION ALL
+			SELECT p.id FROM pnk.products p
+			INNER JOIN product_tree pt ON p.p_id = pt.id
+		)
+		SELECT id FROM product_tree
+	) AS derived_ids;
+
+	SELECT * FROM tmp_product_ids;
+	/*
+	DELETE FROM pnk.items
+	WHERE p_id IN (SELECT id FROM tmp_product_ids);
+	
+	DELETE FROM pnk.main_product
+	WHERE p_id IN (SELECT id FROM tmp_product_ids);
+	*/
+	DELETE FROM pnk.products
+	WHERE id IN (SELECT id FROM tmp_product_ids);
+
+	COMMIT;
+	SELECT id FROM tmp_product_ids;
+	DROP TEMPORARY TABLE IF EXISTS tmp_product_ids;
 END Main $$
 DELIMITER ;
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS `sp_add_product` $$
-CREATE PROCEDURE `sp_add_product`(
+PROCEDURE `sp_add_product`(
 	IN p_product_name VARCHAR(70),
     IN p_parent_id INT,
     IN p_icon VARCHAR(45),
-    IN p_describe VARCHAR(500)
+    IN p_describe TEXT
 )
     SQL SECURITY INVOKER
 Main: BEGIN
@@ -461,8 +484,84 @@ Main: BEGIN
 	INSERT INTO pnk.main_product (p_id, createAt, status)
     VALUES (p_id, utc_timestamp(), 1);
     
-    SELECT LAST_INSERT_ID AS id;
+    SELECT LAST_INSERT_ID() AS id;
     
     COMMIT;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_delete_item_by_p_id` $$
+CREATE PROCEDURE `sp_delete_item_by_p_id`(
+	IN p_id INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF p_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    DELETE FROM pnk.items item
+    WHERE item.p_id = p_id;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_delete_carousel` $$
+CREATE PROCEDURE `sp_delete_carousel`(
+	IN `id` INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    DELETE FROM pnk.image img
+    WHERE img.id = id;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_delete_carousel_by_p_id` $$
+CREATE PROCEDURE `sp_delete_carousel_by_p_id`(
+	IN `id` INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    DELETE FROM pnk.image img
+    WHERE img.p_id = id;
+END Main $$
+DELIMITER ;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `sp_delete_main_product_by_p_id` $$
+CREATE PROCEDURE `sp_delete_main_product_by_p_id`(
+	IN p_id INT
+)
+    SQL SECURITY INVOKER
+Main: BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; END;
+    
+    IF p_id IS NULL THEN
+		CALL pnk.sp_err('-1209', 'Invalid param');
+        LEAVE Main;
+    END IF;
+    
+    DELETE FROM pnk.main_product main
+    WHERE main.p_id = p_id;
 END Main $$
 DELIMITER ;

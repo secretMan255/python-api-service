@@ -3,6 +3,7 @@ from typing import List
 import aiomysql
 import os
 from commond.commond import compareHash
+import json
 
 class MysqlService: 
      Instance = None
@@ -14,12 +15,12 @@ class MysqlService:
                if cls.Instance is None:
                     unix_socket_path = f"/cloudsql/{os.getenv('INSTANCE_CONNECTION_NAME')}"
                     cls.Instance = await aiomysql.create_pool(
-                         # host=os.getenv('DB_HOST'),
+                         host=os.getenv('DB_HOST'),
                          user=os.getenv('DB_USER'),
-                         # port=int(os.getenv('DB_PORT')),
+                         port=int(os.getenv('DB_PORT')),
                          password=os.getenv('DB_PASS'),
                          db=os.getenv('DB_NAME'),
-                         unix_socket=unix_socket_path,
+                         # unix_socket=unix_socket_path,
                          autocommit=True,
                          loop=cls.loop,
                     )
@@ -48,8 +49,9 @@ class MysqlService:
      @classmethod
      async def login(cls, data):
           cls.checkMysqlInitial()
-
+          print('login data: ', data)
           res = await cls.exec('sp_admin_login', [data.username])
+          print('res: ' , res)
           if not res:
                return { 'validate' : False }
           return { 'validate': compareHash(data.password, res[0]["password"]), 'id': res[0]['id']}
@@ -84,12 +86,15 @@ class MysqlService:
      @classmethod
      async def deleteProduct(cls, productId: int):
           cls.checkMysqlInitial()
-          await asyncio.gather(*[cls.exec('sp_delete_product', [x]) for x in productId]) 
-          return 
+          return await asyncio.gather(*[cls.exec('sp_delete_product', [x]) for x in productId]) 
      
      @classmethod
-     async def addProduct(cls, productName: str, parentId: str, icon: str, describe: List[str]):
+     async def addProduct(cls, productName: str, parentId: str, icon: str, describe: str):
           cls.checkMysqlInitial()
+          describe_value = describe
+          if isinstance(describe_value, (list, dict)):
+               describe_value = json.dumps(describe_value)
+               
           return await cls.exec('sp_add_product', [productName, parentId, icon, describe])
 
      @classmethod
@@ -125,6 +130,13 @@ class MysqlService:
           return 
      
      @classmethod
+     async def deleteItemByPId(cls, itemId: List[int]):
+          cls.checkMysqlInitial()
+          print('p_id: ' , itemId)
+          await asyncio.gather(*[cls.exec('sp_delete_item_by_p_id', [x]) for x in itemId])
+          return
+     
+     @classmethod
      async def updateItemParentId(cls, originalId: int, newId: int):
           cls.checkMysqlInitial()
           return await cls.exec('sp_update_item_parent_id', [originalId, newId])
@@ -154,6 +166,12 @@ class MysqlService:
           cls.checkMysqlInitial()
           await asyncio.gather(*[cls.exec('sp_delete_carousel', [x]) for x in id]) 
           return 
+     
+     @classmethod
+     async def deleteCarouselById(cls, id: List[int]):
+          cls.checkMysqlInitial()
+          await asyncio.gather(*[cls.exec('sp_delete_carousel_by_p_id', [x]) for x in id]) 
+          return 
 
      @classmethod
      async def updateCarouselParentId(cls, originId: int , newId: int):
@@ -182,6 +200,12 @@ class MysqlService:
      async def deleteMainProduct(cls, id: List[int]):
           cls.checkMysqlInitial()
           await asyncio.gather(*[cls.exec('sp_delete_main_product', [x]) for x in id]) 
+          return
+     
+     @classmethod
+     async def deleteMainProductById(cls, id: List[int]):
+          cls.checkMysqlInitial()
+          await asyncio.gather(*[cls.exec('sp_delete_main_product_by_p_id', [x]) for x in id]) 
           return
      
      @classmethod

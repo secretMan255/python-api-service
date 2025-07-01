@@ -30,9 +30,8 @@ class ApiBase:
                self.app.register_error_handler(Exception, self.error_handler)
 
                load_dotenv()
-
                # cors config
-               self.app = cors(self.app, allow_origin=os.getenv('ALLOWED_ORIGINS'), allow_credentials=True, allow_headers=["Content-Type", "Authorization"],expose_headers=["Set-Cookie"],allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"])
+               self.app = cors(self.app, allow_origin=["http://localhost:3000","http://127.0.0.1:3000"], allow_credentials=True, allow_headers=["Content-Type", "Authorization"],expose_headers=["Set-Cookie"],allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"])
 
           
           # token secret
@@ -113,7 +112,6 @@ class ApiBase:
      @classmethod
      def post(cls, endpoint: str, handler: Callable, allowedRoles: list, authType: Auth):
           cls.checkInit()
-          
           @wraps(handler)
           async def wrapped(*args, **kwargs):
                authResponse = cls.autheticationMiddleware(authType)
@@ -140,11 +138,13 @@ class ApiBase:
                     if isinstance(result, Response):  
                          return result
 
-                    if result is not None:
+                    if hasattr(result, "json") and callable(getattr(result, "json", None)):
                          jsonResult = await result.json()
 
                          if 'res' in jsonResult and 'errMsg' in jsonResult:
                               return jsonify({'ret': Res.FAIL.value, 'data': jsonResult}), 500
+
+                         return jsonify({'ret': Res.SUCCESS.value, 'data': jsonResult}), 200
 
                     return jsonify({'ret': Res.SUCCESS.value, 'data': result}), 200
                except Exception as e:
@@ -171,7 +171,6 @@ class ApiBase:
                try:
                     payload = jwt.decode(token, cls.secret_key, algorithms=['HS256'])
                     if 'role' not in payload:
-                         print('not found')
                          return jsonify({'ret': Res.FAIL.value, 'msg': 'role is required'}), 401
 
                     g.authUser = payload

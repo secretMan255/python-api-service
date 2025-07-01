@@ -9,7 +9,6 @@ async def test(request):
 
 async def onLogin(request):
      isValid, data = LoginValidate(request)
-     
      if not isValid:
           return jsonify({"msg": f'Invalid input - {data}'})
      
@@ -37,8 +36,10 @@ async def onLogin(request):
                'authToken',
                token,
                httponly=True,  
-               secure=True,    
-               samesite='None',  
+               # secure=True,    
+               secure=False,
+               # samesite='None',
+               samesite="Lax",  
                max_age=3600,  
                path='/'
           )
@@ -79,8 +80,8 @@ async def onUpdateProductDescribe(request):
      isValid, data = UpdateProductDescribeValidate(request)
      if not isValid:
           return jsonify({"status" : -1, "msg": f'Invalid input - {data}'})
-     
-     return await MysqlService.updateProductDescribe(data.productId, data.describe)
+     await MysqlService.updateProductDescribe(data.productId, data.describe)
+     return 
 
 async def onUpdateProductDetail(request):
      isValid, data = UpdateProductDetailValidate(request)
@@ -112,7 +113,9 @@ async def onAddProduct(request):
      isValid, data = AddProductValidate(request)
      if not isValid:
           return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
-     return await MysqlService.addProduct(data.productName, data.parentId, data.icon, data.describe)
+     result = await MysqlService.addProduct(data.productName, data.parentId, data.icon, data.describe)
+     print('result: ' , result)
+     return result
 
 async def onGetItems(request):
      return await MysqlService.getItems()
@@ -141,6 +144,12 @@ async def onDeleteItem(request):
           return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
      return await MysqlService.deleteItem(data.itemId)
 
+async def onDeleteItemByPId(request):
+     isValid, data = DeleteItemValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.deleteItemByPId(data.itemId)
+
 async def onUpdateItemParentId(request):
      isValid, data = UpdateItemParentIdValidate(request)
      if not isValid:
@@ -149,6 +158,7 @@ async def onUpdateItemParentId(request):
      
 async def onAddItem(request):
      isValid, data = AddItemValidate(request)
+     print('data: ', data)
      if not isValid:
           return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
      return await MysqlService.addItem(data.itemName, data.parentId, data.quantity, data.price, data.image, data.describe)
@@ -174,6 +184,12 @@ async def onDeleteCarousel(request):
           return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
      return await MysqlService.deleteCarousel(data.id)
 
+async def onDeleteCarouselById(request):
+     isValid, data = DeleteCarouselValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.deleteCarouselById(data.id)
+
 async def onUpdateCarouselId(request):
      isValid, data = UpdateItemParentIdValidate(request)
      if not isValid:
@@ -188,6 +204,12 @@ async def onDeleteMainProduct(request):
      if not isValid:
           return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
      return await MysqlService.deleteMainProduct(data.id)
+
+async def onDeleteMainProductById(request):
+     isValid, data = DeleteMainProductValidate(request)
+     if not isValid:
+          return jsonify({'status': -1, 'msg': f'Invalid input - {data}'})
+     return await MysqlService.deleteMainProductById(data.id)
 
 async def onAddMainProduct(request):
      isValid, data = AddMainProductValidate(request)
